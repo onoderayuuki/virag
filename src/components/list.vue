@@ -92,6 +92,7 @@ a {
   width: 139px;
   height: 118px;
   padding-top:80px;
+  text-align: center;
 }
 /* メニューバー */
 button{

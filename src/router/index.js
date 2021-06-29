@@ -37,16 +37,7 @@ export default new VueRouter({
   routes: [
   { path: '/', component: Home },
   { path: '/about', component: About },
-  { path: '/login', 
-    component: Login, 
-    beforeEnter(to, from, next) {//追記
-      if (store.getters.idToken) {//すでにidTokenがあれば、"/"に飛ばす
-        next("/");
-      } else { //なければそのまま"/login"に
-        next();
-      }
-    },
-  },
+  { path: '/login', component: Login, },
   { path: '/register', 
     component: Register,
     beforeEnter(to, from, next) {//追記

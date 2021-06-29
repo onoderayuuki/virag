@@ -36,9 +36,15 @@ export default {
           returnSecureToken: true
         }
       ).then((response) => {
-        this.$store.commit('updateIdToken',response.data.idToken)
+        this.$store.commit('updateIdToken',response.data.idToken);
+        this.$store.commit('updateLocalId',response.data.localId);
+         
+        let str =  response.data.email;
+        let userName= str.substring(0, str.indexOf('@'));
+        // console.log(userName);
+        this.$store.commit('updateUserName',userName);
         this.$router.push('/');
-        console.log(response); //返ってきたレスポンスをログに表示
+        // console.log(r/sponse); 
       });
       this.email = "";
       this.password = "";

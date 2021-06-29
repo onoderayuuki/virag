@@ -20,9 +20,9 @@
           </option>
         </select>
         <button id="toggleAddareaButton" @click="isShowAddArea = !isShowAddArea">+</button>
-        <button id="undoButton" v-on:click="undo()">＜＜</button>
-        <button id="redoButton" v-on:click="redo()">＞＞</button>
-        <button id="saveButton" v-on:click="save()">保 存</button>
+        <button id="undoButton" v-on:click="undo()">＜</button>
+        <button id="redoButton" v-on:click="redo()">＞</button>
+        <button id="saveButton" v-on:click="save()">保存</button>
         <!-- {{ loadKey }} -> {{ saveKey }} -->
         <!-- historyStep: {{historyStep}} -->
       </div>
@@ -69,6 +69,18 @@
         />
       </v-layer>
     </v-stage>
+    <v-stage
+      ref="preview"
+      :config="{
+        width: 50,
+        height:  50,
+        scaleX: 1 / 4,
+        scaleY: 1 / 4
+        }"
+    >
+      <v-layer ref="layer">
+      </v-layer>
+    </v-stage>
   </main>
 </template>
 
@@ -100,6 +112,10 @@ export default {
       history:[],
       historyStep:0,
       sizeList: {
+        small: {
+          width: 330,
+          height: 600,
+        },
         A5: {
           width: 559,
           height: 794,
@@ -203,6 +219,8 @@ export default {
         "img/s8.png",
         "img/s9.png",
       ],
+      lastCenter:null,
+      lastDist:0,
     };
   },
   created() {
@@ -342,6 +360,9 @@ export default {
     },
     handleTouchend(e){
       console.log('handleTouchend');
+      //ピンチズームの初期化
+      this.lastDist = 0;
+      this.lastCenter = null;
       //ドラッグ後であればドラッグ終了
       if(this.isDragStart){
           this.handleDragend();
@@ -387,9 +408,16 @@ export default {
     },
     handleDragstart(e) {
       // console.log('handleDragstart');
+        console.log(e.evt.touches.length);
+        e.evt.preventDefault();
       if(e.target.getAttr('draggable')){
         this.isShowTool = false;
         this.isDragStart = true;
+      }else if(e.evt.touches.length>=2){
+        // console.log(e.target);
+        // const touch1 = e.evt.touches[0];
+        // let touch2 = e.evt.touches[1];
+        this.getMultiTouchOnStage(e.evt.touches[0],e.evt.touches[1]);
       }
     },
     handleDragend() {
@@ -406,6 +434,87 @@ export default {
       this.leftValue = x - 5;
       this.topValue = y + 25;
     },
+    getDistance(p1, p2) {
+        return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+      },
+    getCenter(p1, p2) {
+      return {
+        x: (p1.x + p2.x) / 2,
+        y: (p1.y + p2.y) / 2,
+      };
+    },
+    getMultiTouchOnStage(touch1,touch2){
+        if (touch1 && touch2) {
+          // if the stage was under Konva's drag&drop
+          // we need to stop it, and implement our own pan logic with two pointers
+          if (this.stage.isDragging()) {
+            this.stage.stopDrag();
+          }
+          const P1 = {
+            x: touch1.clientX,
+            y: touch1.clientY,
+          };
+          const P2 = {
+            x: touch2.clientX,
+            y: touch2.clientY,
+          };
+
+        // console.log(P1,P2);
+
+          if (!this.lastCenter) {
+            this.lastCenter = this.getCenter(P1, P2);
+            return;
+          }
+          const newCenter = this.getCenter(P1, P2);
+          const dist = this.getDistance(P1, P2);
+
+          if (!this.lastDist) {
+            this.lastDist = dist;
+          }
+
+          // local coordinates of center point
+          const pointTo = {
+            x: (newCenter.x - this.stage.x()) / this.stage.scaleX(),
+            y: (newCenter.y - this.stage.y()) / this.stage.scaleX(),
+          };
+
+          const scale = this.stage.scaleX() * (dist / this.lastDist);
+
+          this.stage.scaleX(scale);
+          this.stage.scaleY(scale);
+
+        // console.log(scale);
+
+          // calculate new position of the stage
+          const dx = newCenter.x - this.lastCenter.x;
+          const dy = newCenter.y - this.lastCenter.y;
+
+          let newPos = {
+            x: newCenter.x - pointTo.x * scale + dx,
+            y: newCenter.y - pointTo.y * scale + dy,
+          };
+
+          this.stage.position(newPos);
+
+          this.lastDist = dist;
+          this.lastCenter = newCenter;
+        }
+    },
+    createPreview(){
+      // clone original layer, and disable all events on it
+      // we will use "let" here, because we can redefine layer later
+      let previewLayer = layer.clone({ listening: false });
+      previewStage.add(previewLayer);
+    },
+    updatePreview() {
+        // we just need to update ALL nodes in the preview
+        layer.children.forEach((shape) => {
+          // find cloned node
+          const clone = previewLayer.findOne('.' + shape.name());
+          // update its position from the original
+          clone.position(shape.position());
+        });
+      }
   },
 };
 </script>
@@ -447,6 +556,7 @@ export default {
 #buttonArea {
   /* position:sticky; */
   margin-left: 50px;
+  margin-right: 50px;
   display: flex;
   justify-content: space-between;
   padding-bottom: 2px;
