@@ -22,7 +22,10 @@
         <button id="toggleAddareaButton" @click="isShowAddArea = !isShowAddArea">+</button>
         <button id="undoButton" v-on:click="undo()">＜</button>
         <button id="redoButton" v-on:click="redo()">＞</button>
+        <div>
         <button id="saveButton" v-on:click="save()">保存</button>
+        <p id="saveMessage" v-show="isSaveMessage">/保存しました\</p>
+        </div>
         <!-- {{ loadKey }} -> {{ saveKey }} -->
         <!-- historyStep: {{historyStep}} -->
       </div>
@@ -37,7 +40,7 @@
         <button id="deleteButton" @click="deleteMotif">×</button>
         <button id="inversionButton" @click="reverseMotif">↔︎</button>
         <button id="copyButton" @click="copyMotif">+</button>
-        <button id="changeButton">...</button>
+        <!-- <button id="changeButton">...</button> -->
       </div>
     </div>
     <!-- canvas ------------------------------------------------------------------------------------->
@@ -64,21 +67,10 @@
           :config="{
             resizeEnabled: false,
             flipEnabled: false,
+            anchorSize:20,
             anchorCornerRadius: 1,
           }"
         />
-      </v-layer>
-    </v-stage>
-    <v-stage
-      ref="preview"
-      :config="{
-        width: 50,
-        height:  50,
-        scaleX: 1 / 4,
-        scaleY: 1 / 4
-        }"
-    >
-      <v-layer ref="layer">
       </v-layer>
     </v-stage>
   </main>
@@ -101,6 +93,7 @@ export default {
       selectedNode:null,
       isShowTool: false,
       isDragStart:false,
+      isSaveMessage:false,
       topValue: 100,
       leftValue: 100,
       motifSrcs: [],
@@ -112,17 +105,25 @@ export default {
       history:[],
       historyStep:0,
       sizeList: {
-        small: {
-          width: 330,
-          height: 600,
+        はがき: {
+          width: 228,
+          height: 426,
+        },
+       '2L' : {
+          width: 366,
+          height: 513,
         },
         A5: {
-          width: 559,
-          height: 794,
+          width: 426,
+          height: 605,
+        },
+        B5: {
+          width: 524,
+          height: 740,
         },
         A4: {
-          width: 794,
-          height: 1123,
+          width: 605,
+          height: 855,
         },
       },
       itemList: [
@@ -274,6 +275,8 @@ export default {
         DataURL: this.stage.toDataURL({ pixelRatio: scale }),
       };
       localStorage.setItem(this.saveKey, JSON.stringify(saveObj));
+      this.isSaveMessage = true;
+      setTimeout(()=>{this.isSaveMessage = false;},1000)
     },
     undo(){
       if(this.historyStep === 0){
@@ -500,21 +503,6 @@ export default {
           this.lastCenter = newCenter;
         }
     },
-    createPreview(){
-      // clone original layer, and disable all events on it
-      // we will use "let" here, because we can redefine layer later
-      let previewLayer = layer.clone({ listening: false });
-      previewStage.add(previewLayer);
-    },
-    updatePreview() {
-        // we just need to update ALL nodes in the preview
-        layer.children.forEach((shape) => {
-          // find cloned node
-          const clone = previewLayer.findOne('.' + shape.name());
-          // update its position from the original
-          clone.position(shape.position());
-        });
-      }
   },
 };
 </script>
@@ -569,7 +557,7 @@ select{
 #toggleAddareaButton {
   padding: 5px 20px;
   height: 30px;
-  color: cadetblue;
+  color: 660000;
   font-size: 20px;
   background-color: beige;
   border-radius: 5% 5% 25% 25%;
@@ -579,29 +567,34 @@ select{
   padding: 0px 10px;
   height: 30px;
   color: beige;
-  background-color: cadetblue;
+  background-color:#660000;
   border-radius: 5%;
   /* margin: 0px 5px 0px 20px; */
 }
 #undoButton,#redoButton {
   padding: 0px 5px;
   height: 30px;
-  color: cadetblue;
+  color: 660000;
   /* background-color: cadetblue; */
   border-radius: 5%;
-  border:1px solid  cadetblue;
+  border:1px solid  #660000;
   /* margin: 0px 5px 0px 20px; */
+}
+#saveMessage {
+  color: #660000;
+  font-size: 10px;
+  margin-left: -10px;
 }
 #tool {
   position: absolute;
   z-index: 98;
-  width: 25px;
+  width: 30px;
   /* box-shadow: 0 0 5px grey; */
   /* border-radius: 50%; */
 }
 #tool button {
   width: 100%;
-  height: 25px;
+  height: 30px;
   color: white;
   font-size: 18px;
   border: none;

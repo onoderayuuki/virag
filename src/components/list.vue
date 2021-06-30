@@ -85,7 +85,7 @@ a {
   margin: 5px;
 }
 .plusBox {
-  background-color: rgb(113, 155, 156);
+  background-color: #660000;
   color: #fff9b0;
   font-size: 32px;
   font-weight: bold;
@@ -109,8 +109,8 @@ button{
   top:3px;
   left:3px;
   z-index: 101;
-  background-color: cadetblue;
-  color: aliceblue;
+  background-color: #660000;
+  color: beige;
   width:35px;
   height:40px;
   /* border-radius: 50%; */

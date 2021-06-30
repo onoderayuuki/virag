@@ -46,7 +46,7 @@ export default {
   margin-top:0;
   margin-left: 87%;
   display: block;
-  background: #a1615f;
+  background: #660000;
   padding: 5px 10px;
   color: beige;
   font-family: fantasy;
