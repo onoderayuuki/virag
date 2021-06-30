@@ -4,14 +4,36 @@
     <!-- menu ------------------------------------------------------------------------------------->
     <div id="menu">
       <div id="addArea" v-show="isShowAddArea">
-        <img   
+        <div class="contents">
+          <transition>
+            <section class="item" :key="currentId">
+              <img
+                v-for="(item, i) in current.content"
+                :key="i"
+                class="motif"
+                :id="i"
+                :src="item"
+                @click="handleAddClick"
+              />
+            </section>
+          </transition>
+        </div>
+        <div class="tabs">
+          <TabItem
+            v-for="item in motifList"
+            v-bind="item"
+            :key="item.id"
+            v-model="currentId"
+          />
+        </div>
+        <!-- <img
           v-for="(item, i) in itemList"
           :key="i"
           class="motif"
           :id="i"
           :src="item"
           @click="handleAddClick"
-        />
+        /> -->
       </div>
       <div id="buttonArea">
         <select v-model="sizeKey" @change="changeSize">
@@ -19,12 +41,17 @@
             {{ key }}
           </option>
         </select>
-        <button id="toggleAddareaButton" @click="isShowAddArea = !isShowAddArea">+</button>
+        <button
+          id="toggleAddareaButton"
+          @click="toggleAddareaButton"
+        >
+          +
+        </button>
         <button id="undoButton" v-on:click="undo()">＜</button>
         <button id="redoButton" v-on:click="redo()">＞</button>
         <div>
-        <button id="saveButton" v-on:click="save()">保存</button>
-        <p id="saveMessage" v-show="isSaveMessage">/保存しました\</p>
+          <button id="saveButton" v-on:click="save()">保存</button>
+          <p id="saveMessage" v-show="isSaveMessage">/保存しました\</p>
         </div>
         <!-- {{ loadKey }} -> {{ saveKey }} -->
         <!-- historyStep: {{historyStep}} -->
@@ -36,6 +63,7 @@
       v-show="isShowTool"
       :style="{ top: topValue + 'px', left: leftValue + 'px' }"
     >
+    <!--  -->
       <div>
         <button id="deleteButton" @click="deleteMotif">×</button>
         <button id="inversionButton" @click="reverseMotif">↔︎</button>
@@ -48,15 +76,13 @@
       class="stage"
       ref="stage"
       :config="stageConfig"
-      @dragstart ="handleDragstart"
-      @touchmove ="handleDragstart"
+      @dragstart="handleDragstart"
+      @touchmove="handleDragstart"
       @mouseup="handleTouchend"
       @touchend="handleTouchend"
     >
       <v-layer ref="layer">
-        <v-image
-          :config="backImage"
-        />
+        <v-image :config="backImage" />
         <v-image
           v-for="(config, index) in motifConfigs"
           :key="index"
@@ -67,7 +93,7 @@
           :config="{
             resizeEnabled: false,
             flipEnabled: false,
-            anchorSize:20,
+            anchorSize: 20,
             anchorCornerRadius: 1,
           }"
         />
@@ -77,39 +103,180 @@
 </template>
 
 <script>
+import TabItem from "./TabItem.vue";
 export default {
   name: "editor",
   props: {
     loadKey: String,
     saveKey: String,
   },
+  components: { TabItem },
   data() {
     return {
+      currentId: 1,
+      motifList: [
+        {
+          id: 1,
+          label: "点",
+          content: [
+            "img/o1-1.png",
+            "img/o1-2.png",
+            "img/o1-3.png",
+            "img/o1-4.png",
+            "img/o1-5.png",
+            "img/o1-6.png",
+          ],
+        },
+        {
+          id: 2,
+          label: "線",
+          content: [
+            "img/o3-1.png",
+            "img/o3-2.png",
+            "img/o4.png",
+            "img/o5.png",
+            "img/o6.png",
+          ],
+        },
+        {
+          id: 3,
+          label: "葉",
+          content: [
+            "img/o7.png",
+            "img/o8.png",
+            "img/o9.png",
+            "img/o10.png",
+            "img/o11.png",
+            "img/o12.png",
+            "img/o13.png",
+            "img/o14.png",
+            "img/o15.png",
+            "img/o2.png",
+          ],
+        },
+        {
+          id: 4,
+          label: "蔦",
+          content: [
+            "img/v1.png",
+            "img/v2.png",
+            "img/v3.png",
+            "img/v4.png",
+            "img/v5.png",
+            "img/v6.png",
+            "img/v7.png",
+            "img/v8.png",
+            "img/v9.png",
+            "img/v10.png",
+            "img/v11.png",
+            "img/v12.png",
+            "img/v13.png",
+            "img/v14.png",
+            "img/v15-1.png",
+            "img/v15-2.png",
+            "img/v15-3.png",
+            "img/v15.png",
+            "img/v16.png",
+          ],
+        },
+        {
+          id: 5,
+          label: "蔦セット",
+          content: [
+            "img/vl1.png",
+            "img/vl2.png",
+            "img/vl3.png",
+            "img/vl4.png",
+            "img/vl5.png",
+            "img/vl6.png",
+            "img/vl7.png",
+            "img/vl8.png",
+            "img/vl9.png",
+            "img/vl10.png",
+          ],
+        },
+        {
+          id: 6,
+          label: "花",
+          content: [
+            "img/mm1-mi.png",
+            "img/mm1-sm.png",
+            "img/mm2-la.png",
+            "img/mm2-mi.png",
+            "img/mm2-sm.png",
+            "img/mm3-la.png",
+            "img/mm3-sm.png",
+            "img/mm4-p.png",
+            "img/mm4.png",
+            "img/mm5-la.png",
+            "img/mm5-me.png",
+            "img/mm5-mi.png",
+            "img/mm5-sm-1.png",
+            "img/mm5-sm-2.png",
+            "img/mm5-sm-bl.png",
+            "img/mm5-sm-r.png",
+            "img/mm6-1.png",
+            "img/mm6-2.png",
+            "img/mm6-3.png",
+            "img/mm6-l-1.png",
+            "img/mm6-l-2.png",
+            "img/mm6-l-3.png",
+            "img/mm6-r-1.png",
+            "img/mm6-r-2.png",
+            "img/mm6-r-3.png",
+            "img/mm7-l.png",
+            "img/mm7-r.png",
+            "img/mm7.png",
+            "img/mm8-la-1.png",
+            "img/mm8-la-2.png",
+            "img/mm8-sm-1.png",
+            "img/mm8-sm-2.png",
+            "img/mm8-sm-3.png",
+          ],
+        },
+        {
+          id: 7,
+          label: "セット",
+          content: [
+            "img/s1.png",
+            "img/s2.png",
+            "img/s3.png",
+            "img/s4.png",
+            "img/s5.png",
+            "img/s6.png",
+            "img/s7.png",
+            "img/s8.png",
+            "img/s9.png",
+          ],
+        },
+      ],
       isShowAddArea: false,
       strageKey: "test0",
       stageConfig: null,
       // image: null,
       // selectedShapeName: "",
-      selectedNode:null,
+      selectedNode: null,
       isShowTool: false,
-      isDragStart:false,
-      isSaveMessage:false,
+      isDragStart: false,
+      isSaveMessage: false,
       topValue: 100,
       leftValue: 100,
+      toolX:100,
+      toolY:100,
       motifSrcs: [],
       motifConfigs: [],
       stage: null,
       backImage: null,
       backImageSrc: null,
       sizeKey: "",
-      history:[],
-      historyStep:0,
+      history: [],
+      historyStep: 0,
       sizeList: {
         はがき: {
           width: 228,
           height: 426,
         },
-       '2L' : {
+        "2L": {
           width: 366,
           height: 513,
         },
@@ -126,102 +293,11 @@ export default {
           height: 855,
         },
       },
-      itemList: [
-        "img/o1-1.png",
-        "img/o1-2.png",
-        "img/o1-3.png",
-        "img/o1-4.png",
-        "img/o1-5.png",
-        "img/o1-6.png",
-        "img/o2.png",
-        "img/o3-1.png",
-        "img/o3-2.png",
-        "img/o4.png",
-        "img/o5.png",
-        "img/o6.png",
-        "img/o7.png",
-        "img/o8.png",
-        "img/o9.png",
-        "img/o10.png",
-        "img/o11.png",
-        "img/o12.png",
-        "img/o13.png",
-        "img/o14.png",
-        "img/o15.png",
-        "img/v1.png",
-        "img/v2.png",
-        "img/v3.png",
-        "img/v4.png",
-        "img/v5.png",
-        "img/v6.png",
-        "img/v7.png",
-        "img/v8.png",
-        "img/v9.png",
-        "img/v10.png",
-        "img/v11.png",
-        "img/v12.png",
-        "img/v13.png",
-        "img/v14.png",
-        "img/v15-1.png",
-        "img/v15-2.png",
-        "img/v15-3.png",
-        "img/v15.png",
-        "img/v16.png",
-        "img/vl1.png",
-        "img/vl2.png",
-        "img/vl3.png",
-        "img/vl4.png",
-        "img/vl5.png",
-        "img/vl6.png",
-        "img/vl7.png",
-        "img/vl8.png",
-        "img/vl9.png",
-        "img/vl10.png",
-        "img/mm1-mi.png",
-        "img/mm1-sm.png",
-        "img/mm2-la.png",
-        "img/mm2-mi.png",
-        "img/mm2-sm.png",
-        "img/mm3-la.png",
-        "img/mm3-sm.png",
-        "img/mm4-p.png",
-        "img/mm4.png",
-        "img/mm5-la.png",
-        "img/mm5-me.png",
-        "img/mm5-mi.png",
-        "img/mm5-sm-1.png",
-        "img/mm5-sm-2.png",
-        "img/mm5-sm-bl.png",
-        "img/mm5-sm-r.png",
-        "img/mm6-1.png",
-        "img/mm6-2.png",
-        "img/mm6-3.png",
-        "img/mm6-l-1.png",
-        "img/mm6-l-2.png",
-        "img/mm6-l-3.png",
-        "img/mm6-r-1.png",
-        "img/mm6-r-2.png",
-        "img/mm6-r-3.png",
-        "img/mm7-l.png",
-        "img/mm7-r.png",
-        "img/mm7.png",
-        "img/mm8-la-1.png",
-        "img/mm8-la-2.png",
-        "img/mm8-sm-1.png",
-        "img/mm8-sm-2.png",
-        "img/mm8-sm-3.png",
-        "img/s1.png",
-        "img/s2.png",
-        "img/s3.png",
-        "img/s4.png",
-        "img/s5.png",
-        "img/s6.png",
-        "img/s7.png",
-        "img/s8.png",
-        "img/s9.png",
-      ],
-      lastCenter:null,
-      lastDist:0,
+      itemList: [],
+      lastCenter: null,
+      lastDist: 0,
+      startX: 5,
+      startY: 25,
     };
   },
   created() {
@@ -231,11 +307,25 @@ export default {
     this.stage = this.$refs.stage.getNode();
     this.deselectMotif();
   },
+  computed: {
+    // startY() {
+    //   let value = 25;
+    //   if (this.isShowAddArea) {
+    //      value+= 300;
+    //   }
+    //   return value;
+    // },
+    current() {
+      return this.motifList.find((el) => el.id === this.currentId) || {};
+    },
+      // leftValue(){ return this.toolX - this.startX },
+      // topValue(){ return this.toolY - this.startY },
+  },
   watch: {
     loadKey() {
       this.load();
       this.deselectMotif();
-    },
+    }
   },
   methods: {
     load() {
@@ -256,7 +346,7 @@ export default {
             x: json[i].x,
             y: json[i].y,
             rotation: json[i].rotation,
-            scaleX:json[i].scaleX,
+            scaleX: json[i].scaleX,
             name: "test" + this.motifConfigs.length,
             draggable: false,
           });
@@ -276,39 +366,41 @@ export default {
       };
       localStorage.setItem(this.saveKey, JSON.stringify(saveObj));
       this.isSaveMessage = true;
-      setTimeout(()=>{this.isSaveMessage = false;},1000)
+      setTimeout(() => {
+        this.isSaveMessage = false;
+      }, 1000);
     },
-    undo(){
-      if(this.historyStep === 0){
+    undo() {
+      if (this.historyStep === 0) {
         return;
       }
-      this.historyStep -= 1
+      this.historyStep -= 1;
       this.loadHistory(this.historyStep);
     },
-    redo(){
-      if(this.historyStep === this.history.length-1){
+    redo() {
+      if (this.historyStep === this.history.length - 1) {
         return;
       }
-      this.historyStep += 1
+      this.historyStep += 1;
       this.loadHistory(this.historyStep);
     },
-    loadHistory(historyStep){
+    loadHistory(historyStep) {
       this.deselectMotif();
       const previous = this.history[historyStep];
       this.motifConfigs = previous;
     },
-    recordConfigs(){
-      console.log('recordConfigs');
-      if(this.history.length > 10){
-        this.history.shift(); 
+    recordConfigs() {
+      // console.log('recordConfigs');
+      if (this.history.length > 10) {
+        this.history.shift();
       }
-      const nowCnfigs = this.motifConfigs.map((el)=>{
-        const addedMotif =  this.stage.findOne("." + el.name);
+      const nowCnfigs = this.motifConfigs.map((el) => {
+        const addedMotif = this.stage.findOne("." + el.name);
         return addedMotif.getAttrs();
       });
       this.history.push(nowCnfigs);
-      console.log(this.history.length);
-      this.historyStep = this.history.length-1;
+      // console.log(this.history.length);
+      this.historyStep = this.history.length - 1;
       this.motifConfigs = nowCnfigs;
     },
     setBack() {
@@ -316,9 +408,9 @@ export default {
       image.src = this.backImageSrc;
       image.onload = () => {
         this.backImage = {
-        image,
-        name: 'back'
-        }
+          image,
+          name: "back",
+        };
       };
     },
     changeSize() {
@@ -329,17 +421,23 @@ export default {
       this.selectedNode.destroy();
     },
     reverseMotif() {
-      const direction= this.selectedNode.getAttr('scaleX')
-      this.selectedNode.scaleX( direction*-1 );
-      const width = this.selectedNode.getAttr('width');
-      this.selectedNode.move({x : width*direction , y : 0 }) ;
+      const direction = this.selectedNode.getAttr("scaleX");
+      this.selectedNode.scaleX(direction * -1);
+      const width = this.selectedNode.getAttr("width");
+      this.selectedNode.move({ x: width * direction, y: 0 });
     },
     copyMotif() {
-      const attr = this.selectedNode.getAttrs()
+      const attr = this.selectedNode.getAttrs();
       console.log(attr.image.src);
-      this.addMotif(attr.image.src,attr.x+15,attr.y+15,attr.scaleX,attr.rotation);
+      this.addMotif(
+        attr.image.src,
+        attr.x + 15,
+        attr.y + 15,
+        attr.scaleX,
+        attr.rotation
+      );
     },
-    addMotif(addSrc, x= 10, y = 10, scaleX=1, rotation =0) {
+    addMotif(addSrc, x = 10, y = 10, scaleX = 1, rotation = 0) {
       this.motifSrcs.push(addSrc);
       const addName = "test" + this.motifConfigs.length;
       const image = new window.Image();
@@ -356,20 +454,23 @@ export default {
         });
       };
     },
-    handleAddClick(e){
-      const addSrc = this.itemList[e.target.id];
-      this.addMotif(addSrc,Math.random()*100);
+    handleAddClick(e) {
+      // console.log(e.target);
+      // console.log(this.current.content);
+      // const addSrc = this.motifList[e.target.id];
+      const addSrc = this.current.content[e.target.id];
+      this.addMotif(addSrc, Math.random() * 100);
       this.recordConfigs();
     },
-    handleTouchend(e){
-      console.log('handleTouchend');
+    handleTouchend(e) {
+      // console.log("handleTouchend");
       //ピンチズームの初期化
       this.lastDist = 0;
       this.lastCenter = null;
       //ドラッグ後であればドラッグ終了
-      if(this.isDragStart){
-          this.handleDragend();
-          return;
+      if (this.isDragStart) {
+        this.handleDragend();
+        return;
       }
       //選択対象がない時も何もしない
       if (e.target === e.target.getStage()) {
@@ -377,12 +478,12 @@ export default {
       }
       const name = e.target.name();
       const isMotif = this.motifConfigs.find((r) => r.name === name);
-        //モチーフ以外（背景画像）を選んだ場合も何もしない
+      //モチーフ以外（背景画像）を選んだ場合も何もしない
       if (isMotif == null) {
-          return;
+        return;
       }
-      if(this.selectedNode == null ){
-        //選択状態のモチーフがなく、タッチ対象がモチーフだった時だけ選択状態にする 
+      if (this.selectedNode == null) {
+        //選択状態のモチーフがなく、タッチ対象がモチーフだった時だけ選択状態にする
         this.selectedNode = this.stage.findOne("." + name);
         this.selectMotif();
       } else {
@@ -398,116 +499,138 @@ export default {
       }
       transformerNode.nodes([this.selectedNode]);
       this.selectedNode.draggable(true);
-      this.moveTool(this.selectedNode.getAttr('x'),this.selectedNode.getAttr('y'));
+      this.setToolPosition(
+        this.selectedNode.getAttr("x"),
+        this.selectedNode.getAttr("y")
+      );
       this.isShowTool = true;
     },
-    deselectMotif(){
+    deselectMotif() {
       const transformerNode = this.$refs.transformer.getNode();
       transformerNode.nodes([]);
-      if(this.selectedNode != null){
+      if (this.selectedNode != null) {
         this.selectedNode.draggable(false);
       }
       this.isShowTool = false;
     },
     handleDragstart(e) {
       // console.log('handleDragstart');
-        console.log(e.evt.touches.length);
-        e.evt.preventDefault();
-      if(e.target.getAttr('draggable')){
+      // console.log(e.evt.touches.length);
+      // e.evt.preventDefault();
+      if (e.target.getAttr("draggable")) {
         this.isShowTool = false;
         this.isDragStart = true;
-      }else if(e.evt.touches.length>=2){
+      } else if (e.evt.touches.length >= 2) {
         // console.log(e.target);
         // const touch1 = e.evt.touches[0];
         // let touch2 = e.evt.touches[1];
-        this.getMultiTouchOnStage(e.evt.touches[0],e.evt.touches[1]);
+        this.getMultiTouchOnStage(e.evt.touches[0], e.evt.touches[1]);
       }
     },
     handleDragend() {
-      if(this.isDragStart){
+      if (this.isDragStart) {
         // this.updateMenu(this.selectedNode.x,this.selectedNode.y);
         this.isShowTool = true;
         this.isDragStart = false;
-        this.moveTool(this.selectedNode.getAttr('x'),this.selectedNode.getAttr('y'));
+        this.setToolPosition(
+          this.selectedNode.getAttr("x"),
+          this.selectedNode.getAttr("y")
+        );
         this.recordConfigs();
       }
     },
-    moveTool(x,y) {
+    setToolPosition(x, y) {
       //menu point
-      this.leftValue = x - 5;
-      this.topValue = y + 25;
+      this.toolX = x;
+      this.toolY = y;
+      this.leftValue = this.toolX - this.startX;
+      this.topValue = this.toolY + this.startY;
+    },
+    moveToolPosition(addX,addY){
+
+    },
+    toggleAddareaButton(){
+      // console.log('toggleAddareaButton');
+      // console.log(this.leftValue);
+      this.isShowAddArea = !this.isShowAddArea;
+      if(this.isShowAddArea){
+        this.startY = 325;
+        this.topValue += 300;
+      }else{
+        this.startY = 25;
+        this.topValue -= 300;
+      }
     },
     getDistance(p1, p2) {
-        return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-      },
+      return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    },
     getCenter(p1, p2) {
       return {
         x: (p1.x + p2.x) / 2,
         y: (p1.y + p2.y) / 2,
       };
     },
-    getMultiTouchOnStage(touch1,touch2){
-        if (touch1 && touch2) {
-          // if the stage was under Konva's drag&drop
-          // we need to stop it, and implement our own pan logic with two pointers
-          if (this.stage.isDragging()) {
-            this.stage.stopDrag();
-          }
-          const P1 = {
-            x: touch1.clientX,
-            y: touch1.clientY,
-          };
-          const P2 = {
-            x: touch2.clientX,
-            y: touch2.clientY,
-          };
+    getMultiTouchOnStage(touch1, touch2) {
+      if (touch1 && touch2) {
+        // if the stage was under Konva's drag&drop
+        // we need to stop it, and implement our own pan logic with two pointers
+        if (this.stage.isDragging()) {
+          this.stage.stopDrag();
+        }
+        const P1 = {
+          x: touch1.clientX,
+          y: touch1.clientY,
+        };
+        const P2 = {
+          x: touch2.clientX,
+          y: touch2.clientY,
+        };
 
         // console.log(P1,P2);
 
-          if (!this.lastCenter) {
-            this.lastCenter = this.getCenter(P1, P2);
-            return;
-          }
-          const newCenter = this.getCenter(P1, P2);
-          const dist = this.getDistance(P1, P2);
+        if (!this.lastCenter) {
+          this.lastCenter = this.getCenter(P1, P2);
+          return;
+        }
+        const newCenter = this.getCenter(P1, P2);
+        const dist = this.getDistance(P1, P2);
 
-          if (!this.lastDist) {
-            this.lastDist = dist;
-          }
+        if (!this.lastDist) {
+          this.lastDist = dist;
+        }
 
-          // local coordinates of center point
-          const pointTo = {
-            x: (newCenter.x - this.stage.x()) / this.stage.scaleX(),
-            y: (newCenter.y - this.stage.y()) / this.stage.scaleX(),
-          };
+        // local coordinates of center point
+        const pointTo = {
+          x: (newCenter.x - this.stage.x()) / this.stage.scaleX(),
+          y: (newCenter.y - this.stage.y()) / this.stage.scaleX(),
+        };
 
-          const scale = this.stage.scaleX() * (dist / this.lastDist);
+        const scale = this.stage.scaleX() * (dist / this.lastDist);
 
-          this.stage.scaleX(scale);
-          this.stage.scaleY(scale);
+        this.stage.scaleX(scale);
+        this.stage.scaleY(scale);
 
         // console.log(scale);
 
-          // calculate new position of the stage
-          const dx = newCenter.x - this.lastCenter.x;
-          const dy = newCenter.y - this.lastCenter.y;
+        // calculate new position of the stage
+        const dx = newCenter.x - this.lastCenter.x;
+        const dy = newCenter.y - this.lastCenter.y;
 
-          let newPos = {
-            x: newCenter.x - pointTo.x * scale + dx,
-            y: newCenter.y - pointTo.y * scale + dy,
-          };
+        let newPos = {
+          x: newCenter.x - pointTo.x * scale + dx,
+          y: newCenter.y - pointTo.y * scale + dy,
+        };
 
-          this.stage.position(newPos);
-
-          this.lastDist = dist;
-          this.lastCenter = newCenter;
-        }
+        this.stage.position(newPos);
+        // console.log(newPos);
+        this.lastDist = dist;
+        this.lastCenter = newCenter;
+      }
     },
   },
 };
 </script>
 <style>
-
 #edit-container {
   position: absolute;
   top: 0;
@@ -532,11 +655,11 @@ export default {
   border-radius: 2%;
   /* z-index: 99;   */
 }
-#addArea>div{
-  width:100px;
+#addArea > div {
+  /* width: 100px; */
 }
-.motif{
-  transform: scale(0.5,0.5);
+.motif {
+  transform: scale(0.5, 0.5);
   /* margin-right:-30px; */
   /* margin-right:-80px; */
 }
@@ -551,7 +674,7 @@ export default {
   /* margin-left: 100px; */
   /* z-index: 99; */
 }
-select{
+select {
   height: 30px;
 }
 #toggleAddareaButton {
@@ -567,17 +690,18 @@ select{
   padding: 0px 10px;
   height: 30px;
   color: beige;
-  background-color:#660000;
+  background-color: #660000;
   border-radius: 5%;
   /* margin: 0px 5px 0px 20px; */
 }
-#undoButton,#redoButton {
+#undoButton,
+#redoButton {
   padding: 0px 5px;
   height: 30px;
   color: 660000;
   /* background-color: cadetblue; */
   border-radius: 5%;
-  border:1px solid  #660000;
+  border: 1px solid #660000;
   /* margin: 0px 5px 0px 20px; */
 }
 #saveMessage {
@@ -613,5 +737,28 @@ select{
 }
 #changeButton {
   background-color: rgb(0, 255, 98, 0.9);
+}
+.contents {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  overflow: scroll;
+  /* border: 2px solid #000; */
+}
+.item {
+  box-sizing: border-box;
+  padding: 10px;
+  width: 100%;
+  transition: all 0.8s ease;
+}
+/* トランジション用スタイル */
+.v-leave-active {
+  position: absolute;
+}
+.v-enter {
+  transform: translateX(-100%);
+}
+.v-leave-to {
+  transform: translateX(100%);
 }
 </style>
