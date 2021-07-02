@@ -1,5 +1,7 @@
 # virag
 https://virag-d7f0f.firebaseapp.com/
+![image](https://user-images.githubusercontent.com/38471145/124309311-7ee5ac80-dba5-11eb-9f3b-0e1dd297ff82.png)
+
 ## 概要
  - アプリ
    - 刺繍のモチーフを使って配置デザインできるWebアプリ
@@ -48,6 +50,7 @@ npm run serve
 ### Compiles and minifies for production
 ```
 npm run build
+firebase deploy
 ```
 ### Lints and fixes files
 ```
