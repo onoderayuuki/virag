@@ -11,6 +11,7 @@ https://virag-d7f0f.firebaseapp.com/
    - ログイン機能は現時点では認証のみの試作段階。ログインなしで使える 
  - 技術
    - fabric.js →Konva.js
+     - Canvas利用をKonva vueに全面依拠してる    
    - Vue-CLIによるWebpack ＋ Vue-router + Vuex
      - Vue-routerはログインページをSPAの一部として作るのに使っている
      - Vuexはログイン情報を複数ページで共有して利用するのに利用している 
